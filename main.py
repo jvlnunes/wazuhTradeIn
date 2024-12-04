@@ -1,7 +1,7 @@
-from functions import  wazuh #, database
+from functions import  Wazuh #, database
 from os import environ
 import json
-wzh = wazuh.Wazuh()
+wzh = Wazuh()
 
 def get_indices():
     indices = wzh.indices_request().json()
