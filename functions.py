@@ -21,7 +21,7 @@ class Wazuh:
     def data_request(self, idx):
         url = self.url_base + '/' + idx + '/_search?format=json'
         query = {
-            "size": 10000,
+            "size": 100,
             "query": {
                 # "bool": {
                 #     "filter": [
