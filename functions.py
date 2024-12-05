@@ -8,10 +8,10 @@ class Wazuh:
     def __init__(self):
         self.url_base = "https://172.29.252.6:9200"
         self.headers = {"Content-Type": "application/json"}
-        # self.auth = ("jv.nunes@tradein.com.br", "123@Change")
+        # self.auth = ("jv.nunes", "123@Change")
         self.auth = (
-            environ.get('WAZUH_USER', 'jv.nunes@tradein.com.br'),
-            environ.get('WAZUH_PASS', '123@Change')
+            environ.get('WAZUH_USER', 'jv.nunes' ),
+            environ.get('WAZUH_PASS','k2C2g79(;S')
         )
     
     # def __init__(self):

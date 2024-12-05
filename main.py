@@ -11,13 +11,15 @@ def get_indices():
 def get_data(idx):
     data = wzh.data_request(idx).json()
     # print(data)
+    counter = 1
     for event in data['hits']['hits']:
         print('-----------------------------------')
         agent = event['_source']['agent']
         fulldata = event['_source'].get('data', 'null')
         if fulldata != 'null':
             os = event['_source']['data'].get('os', 'false')
-        
+            print(f'Number: {counter}')
+            counter += 1
             print(f"Agent_id: {agent['id']}")
             print(f"Agent_ip: {agent['ip']}")
             print(f"Agent_labels: {agent.get('labels', 'No labels available')}")
