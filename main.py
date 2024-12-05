@@ -20,6 +20,7 @@ def get_data(idx):
             os = event['_source']['data'].get('os', 'false')
             print(f'Number: {counter}')
             counter += 1
+            print(f"ID: {fulldata.get('id', 'null')}")
             print(f"Agent_id: {agent['id']}")
             print(f"Agent_ip: {agent['ip']}")
             print(f"Agent_labels: {agent.get('labels', 'No labels available')}")
@@ -27,7 +28,6 @@ def get_data(idx):
             print(f"DST_IP: {fulldata.get('dstip', 'null')}")
             print(f"DST_PORT: {fulldata.get('dstport', 'null')}")
             print(f"DST_USER: {fulldata.get('dstuser', 'null')}")
-            print(f"ID: {fulldata.get('id', 'null')}")
             print(f"PORT: {fulldata.get('port', 'null')}")
             print(f"PROCESS: {fulldata.get('process', 'null')}")
             print(f"PROTOCOL: {fulldata.get('protocol', 'null')}")

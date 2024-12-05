@@ -8,20 +8,11 @@ class Wazuh:
     def __init__(self):
         self.url_base = "https://172.29.252.6:9200"
         self.headers = {"Content-Type": "application/json"}
-        # self.auth = ("jv.nunes", "123@Change")
         self.auth = (
-            environ.get('WAZUH_USER', 'jv.nunes' ),
-            environ.get('WAZUH_PASS','k2C2g79(;S')
+            environ.get('WAZUH_USER', 'jv.nunes'   ),
+            environ.get('WAZUH_PASS', 'k2C2g79(;S' )
         )
-    
-    # def __init__(self):
-    #     self.url_base = environ.get('WAZUH_URL', 'https://default-url:9200')
-    #     self.headers = {"Content-Type": "application/json"}
-    #     self.auth = (
-    #         environ.get('WAZUH_USER', 'default_user'),
-    #         environ.get('WAZUH_PASS', 'default_pass')
-    #     )
-        
+
     def indices_request(self):
         url = self.url_base + '/_cat/indices?format=json'
         response = requests.get(url, headers=self.headers, auth=self.auth, verify=False)
