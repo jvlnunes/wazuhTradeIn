@@ -20,7 +20,7 @@ def get_data(idx):
             os = event['_source']['data'].get('os', 'false')
             print(f'Number: {counter}')
             counter += 1
-            print(f"ID: {fulldata.get('id', 'null')}")
+            print(f"ID: {fulldata.get('id')}")
             print(f"Agent_id: {agent['id']}")
             print(f"Agent_ip: {agent['ip']}")
             print(f"Agent_labels: {agent.get('labels', 'No labels available')}")
