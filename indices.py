@@ -1,9 +1,18 @@
+class Event:
+  def __init__(self, _index=None, _id=None, _score=None, _source=None):
+    self._index  = _index
+    self._id     = _id
+    self._score  = _score
+    self._source = _source
+
+
 class Data:
     def __init__(self, action     = None, arch        = None, audit = None, aws      = None, cis      = None, command = None, 
                        docker     = None, dpkg_status = None, dstip = None, dstport  = None, dstuser  = None, 
                        extra_data = None, file        = None, gcp   = None, github   = None, hardware = None, 
                        id         = None, integration = None, level = None, ms_graph = None, netinfo  = None, 
                        office365  = None, os          = None):
+      
         self.action      = action
         self.arch        = arch
         self.audit       = audit  
@@ -33,6 +42,7 @@ class OS:
                        hostname     = None, major   = None, minor           = None, name   = None, patch = None, 
                        platform     = None, release = None, release_version = None, sysname= None, 
                        version      = None):
+      
         self.architecture    = architecture
         self.build           = build
         self.codename        = codename

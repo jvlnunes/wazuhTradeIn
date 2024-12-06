@@ -18,19 +18,36 @@ class Wazuh:
         response = requests.get(url, headers=self.headers, auth=self.auth, verify=False)
         return response
     
-    def data_request(self, idx, query):
-        url = self.url_base + '/' + idx + '/_search?format=json'
-        query = {
-            "size": 100,
-            "query": {
-                # "bool": {
-                #     "filter": [
-                #         {"term": {"agent.id": 598}}
-                #     ]
-                # }
-                "match_all": {}
+    def data_request(self, idx, exclude_ids=None, size=10000):
+        url = self.url_base + '/' + idx + '/_search?scroll=1m&format=json'
+        if exclude_ids is None:
+            query = {
+                "size": int(size),
+                "query": {
+                    # 'exclude_ids': {
+                    #      "values": ['gHTRiZMBFzPRs2NIUWhw']
+                    #     }                     
+                    "match_all": {}
+                }
             }
-        }
+        else:
+            query = {
+                "size": int(size),
+                "query": {
+                    "bool": {
+                        "must_not": {
+                            "ids": {
+                                "values": exclude_ids
+                            }
+                        }
+                    }
+                },
+                "sort": [
+                    {"@timestamp": "asc"}  # Ou qualquer outro campo ordenável
+                ]
+            }
+            
+            
         response = requests.get(url, headers=self.headers, auth=self.auth, data=json.dumps(query), verify=False)
         return response
     
@@ -41,29 +58,3 @@ class Wazuh:
             idsAr.append(event['_id'])
         
         return idsAr
-        
-        
-    def trata_data_request(self,idx,nEvents):
-        # 1 iteração 
-        tam = max
-        respIds = []
-        query = { 
-                    "size": tam, 
-                    "match_all":{} 
-                }
-        
-        while nEvents > len(respIds):
-            # get newIds
-            resp = self.data_request(self,idx,query).json()
-            newIds = self.get_ids(resp)
-            respIds.extend(newIds)
-        
-            query = {   
-                        "size": tam,
-                        "bool":{
-                            "filter":{
-                                {"term":{"event.id": not respIds}}
-                            }
-                        }
-                    }
-            
