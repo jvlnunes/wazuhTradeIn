@@ -5,7 +5,6 @@ class Event:
     self._score  = _score
     self._source = _source
 
-
 class Data:
     def __init__(self, action     = None, arch        = None, audit = None, aws      = None, cis      = None, command = None, 
                        docker     = None, dpkg_status = None, dstip = None, dstport  = None, dstuser  = None, 
