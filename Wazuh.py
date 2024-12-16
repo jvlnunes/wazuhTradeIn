@@ -4,14 +4,15 @@ import requests
 import urllib3
 from tqdm import tqdm
 
-# urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 class Wazuh:
     def __init__(self):
         self.url_base = "https://172.29.252.6:9200"
         self.headers = {"Content-Type": "application/json"}
         self.auth = (
             environ.get('WAZUH_USER', 'jv.nunes'   ), 
-            environ.get('WAZUH_PASS', 'k2C2g79(;S' )
+            environ.get('WAZUH_PASS', 'Q1w2e3r4t5' )
         )
 
     def indices_request(self):
@@ -28,6 +29,11 @@ class Wazuh:
         }
         
         response = requests.post(url, headers=self.headers, auth=self.auth, json=query, verify=False)
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise Exception(f"Erro na resposta: {err}")
+        
         data = response.json()
 
         if "count" in data:
@@ -73,7 +79,7 @@ class Wazuh:
         last_sort_value = None 
 
         total_events = self.get_total_events(idx)
-        pbar = tqdm(total=total_events, initial=0, desc="Buscando Eventos no Wazuh", unit="events")
+        pbar = tqdm(total=total_events, initial=0, desc="Buscando Eventos", unit="events")
         while True:
             query = {
                 "size": batch_size,
@@ -141,6 +147,8 @@ class Wazuh:
                 return response_data["hits"]["hits"]  
             else:
                 return []  
-        except:
+        except Exception as e:
+            print(f"Erro na resposta {e}")
             return []
+        
         

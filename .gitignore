@@ -1,2 +1,5 @@
 wazuh-alerts-4.x-2024.10.26.db
 wazuh-alerts-4.x-2024.10.26.db.old1
+__pycache__/banco_wazuh.cpython-311.pyc
+*.db
+*/*.db

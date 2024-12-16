@@ -1,9 +1,9 @@
-from functions import  Wazuh 
-from tqdm import tqdm
+from   Wazuh import  Wazuh 
+from   tqdm import tqdm
 import logging
 
 import banco_wazuh as bd
-#teste
+
 wzh = Wazuh()
 
 def get_indices():
@@ -37,12 +37,12 @@ def get_data(idx,ids=None,tam=10000):
 def import_events_by_Id(idx,tam=10000):
     bd.createTables(idx)
     totalEventsCount = wzh.get_total_events(idx)
-    idsExistentes = bd.retornaIds() or []
+    idsExistentes = bd.retornaIds(idx) or []
     
     print(f'Total de Eventos do Index     = {totalEventsCount}')    
     print(f'Eventos já Inseridos no Banco = {(len(idsExistentes))}')
         
-    pbar = tqdm(total=(totalEventsCount-len(idsExistentes)),initial=len(idsExistentes), desc='Importing events')
+    pbar = tqdm(total=(totalEventsCount),initial=len(idsExistentes), desc='Buscando e Salvando Eventos', unit="events")
     
     while len(idsExistentes) < totalEventsCount:
 
@@ -87,6 +87,9 @@ def fast_import_events(idx):
     bd.createTables(idx)
     
     totalEventsCount = wzh.get_total_events(idx)
+    if int(totalEventsCount) > 2500000:
+        print(f"Esse método suporta até 2,5 Mi Registros, o index inserido possui {totalEventsCount}\nSelecione outro método ")
+        return []
     
     all_events = wzh.fetch_events_by_timestamp(idx)
     
@@ -107,21 +110,74 @@ def fast_import_events(idx):
     
     pbar.close()
     
+def import_compressed_events(idx):
+    totalEventsCount = wzh.get_total_events(idx)
+    print(f'Total de Eventos do Index = {totalEventsCount}')
     
-idx = 'wazuh-alerts-4.x-2024.10.26'
-# import_events(idx)
-# continue_import_events(idx)
-# fast_import_events(idx)
-# query = {
-#     "query": {
-#         "ids": {
-#             "values": ["0oBFypIBDGHEftfh7IQl"]
-#         }
-#     }
-# }
-# print(wzh.data_request(idx,query)['hits']['hits'])
+    all_events = wzh.fetch_events_by_timestamp(idx)
+    
+    pbear = tqdm(total=len(all_events), initial=0, desc="Comprimindo Eventos", unit="events")
+    compressed_events = []
+    for event in all_events:
+        compressed_events.append(bd.compress_data(event))
+        pbear.update(1)
+    pbear.close()    
+    
+    pbar = tqdm(total=len(compressed_events), initial=0, desc="Salvando Eventos no Banco", unit="events")
+    idx = bd.createTablesCompressed(idx)
+    
+    batch_size = 10000
+    for i in range(0, len(compressed_events), batch_size):
+        try:
+            batch_events = compressed_events[i:i+batch_size]
+            bd.insertDataCompressed(idx,batch_events)
+            pbar.update(len(batch_events))
+        except Exception as e:
+            logging.error(f"Error inserting batch {i}: {e}")
+    
+    pbar.close()
+    
+def import_compressed_events_by_id(idx):
+    total_events_count = wzh.get_total_events(idx)
+    
+    new_idx  = bd.createTablesCompressed(idx)
+    ids_existentes = []
+    
+    print(f"Total de Eventos do Index = {total_events_count}")
+    
+    pbar = tqdm(total=(total_events_count), initial=len(ids_existentes), desc="Importing events")
+    
+    while len(ids_existentes) < total_events_count:
+        try:               
+            events = wzh.data_request2(idx, exclude_ids=ids_existentes, size=10000)
+            
+            if not events:
+                break  
+            
+            compressed_events = []
+            for event in events:
+                compressed_events.append(bd.compress_data(event))
+            
+            bd.insertDataCompressed(new_idx,compressed_events)
+            
+            ids_existentes.extend([event['_id'] for event in events])
+            
+            pbar.update(len(ids_existentes))
+        
+        except Exception as e:
+            print(f"Error inserting batch : {e}")
+    
+    pbar.close()    
+    
+# def return_events_from_db(idx):
+#     return bd.getData(idx,"SELECT * FROM eventos") 
 
-# totalEventsCount = wzh.get_total_events(idx)
-# print(f'Total de Eventos do Index = {totalEventsCount}')
-# idsExistentes = bd.retornaIds()
-# print(f'Eventos já Inseridos = {(len(idsExistentes))}')
+# def compress_existing_data_base(idx):
+#     conn = bd.getConn(idx)
+#     cursor = conn.cursor()
+#     events = cursor.fetchall("SELECT * FROM eventos")
+    
+idx = 'wazuh-alerts-4.x-2024.12.16'
+# import_compressed_events_by_id(idx)
+# fast_import_events(idx)
+import_events_by_Id(idx)
