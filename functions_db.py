@@ -50,16 +50,14 @@ def createTablesCompressed(idx):
             )    
     '''
     try:
-        conn = getConn("Bases_de_Eventos\COMPRESSED_"+idx)
+        new_idx = "COMPRESSED_"+idx
+        conn = getConn(new_idx)
         cursor = conn.cursor()
         cursor.execute(query)
         conn.commit()
         
-        # cursor.execute("PRAGMA table_info(eventos)")
-        # print(cursor.fetchall())
-
         conn.close()
-        return "Bases_de_Eventos\COMPRESSED_"+idx
+        return new_idx
         
     except Exception as e:
         print(f'Error creating tables: {e}') #print(e)

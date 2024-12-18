@@ -14,10 +14,14 @@ class Wazuh:
             environ.get('WAZUH_USER', 'jv.nunes'   ), 
             environ.get('WAZUH_PASS', 'Q1w2e3r4t5' )
         )
-
+        
     def indices_request(self):
         url = self.url_base + '/_cat/indices?format=json'
         response = requests.get(url, headers=self.headers, auth=self.auth, verify=False)
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise Exception(f"Error in response: {err}")
         return response
     
     def get_total_events(self,idx):
