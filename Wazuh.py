@@ -12,6 +12,7 @@ class Wazuh:
         self.headers = {"Content-Type": "application/json"}
         self.auth = (
             environ.get('WAZUH_USER', 'jv.nunes'   ), 
+            # environ.get('WAZUH_PASS', 'RKi2FW56u9t8' )
             environ.get('WAZUH_PASS', 'Q1w2e3r4t5' )
         )
         
@@ -23,6 +24,15 @@ class Wazuh:
         except requests.exceptions.HTTPError as err:
             raise Exception(f"Error in response: {err}")
         return response
+    
+    def get_mappings(self,idx):
+        url = self.url_base + '/' + idx + '/_mapping'
+        response = requests.get(url, headers=self.headers, auth=self.auth, verify=False)
+        try:
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise Exception(f"Erro na resposta: {err}")
+        return response.json()
     
     def get_total_events(self,idx):
         url = self.url_base + '/' + idx + '/_count'
@@ -154,5 +164,62 @@ class Wazuh:
         except Exception as e:
             print(f"Erro na resposta {e}")
             return []
+    
+    def data_request_especified_columns(self, idx, query=None, exclude_ids=None, columns=None,size=10000):
+ 
+        url = self.url_base + '/' + idx + '/_search?scroll=1m&format=json'
+    
+        if columns is None:
+            query = {
+                "size": int(size),
+                "query": {                 
+                    "match_all": {}
+                }
+            }
+        else:
+            query = {
+                "size": int(size),
+                "_source": columns,
+                "query": {
+                    "match_all": {}
+                }
+            }
+
+        response = requests.get(url, headers=self.headers, auth=self.auth, data=json.dumps(query), verify=False)
+
+        if response.status_code != 200:
+            raise Exception(f"Error in response: {response.status_code}")
+        else :
+            return response.json()  
+
+    def return_events_with_specified_fields(self, idx, columns=None,size=10000):
         
-        
+        url = self.url_base + '/' + idx + '/_search?scroll=1m&format=json'
+    
+        if columns is None:
+            print("Nenhum campo informado")
+            return
+        else:
+            filtros = [
+                {
+                    "exists": {
+                        "field": column
+                    }
+                } for column in columns
+            ]
+            query = {
+                "size": int(size),
+                # "_source": columns,
+                "query": {
+                    "bool": {
+                        "filter": filtros                        
+                    }
+                }
+            }
+            # print(query)
+
+        response = requests.get(url, headers=self.headers, auth=self.auth, data=json.dumps(query), verify=False)
+        return response.json()
+
+        if response.status_code != 200:
+            raise Exception(f"Error in response: {response.status_code}")

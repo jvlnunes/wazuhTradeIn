@@ -3,3 +3,5 @@ wazuh-alerts-4.x-2024.10.26.db.old1
 __pycache__/*
 *.db
 */*.db
+Wazuh_Events_Mapping.json
+{'_scroll_id': 'FGluY2x1ZGVfY29udGV4dF91.json

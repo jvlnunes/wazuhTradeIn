@@ -17,11 +17,11 @@ This project is licensed under the MIT License. See LICENSE.txt for details.
 Acknowledgements
 This project uses the following external libraries:
 
-requests: for making API requests
-tqdm:     for displaying the progress bar
+    requests: for making API requests
+    tqdm:     for displaying the progress bar
 
 Contact Information
-For questions or issues, contact Jvnunes at [Your Email].
+For questions or issues, contact Jv Nunes at [jv.nunes@tradein.com.br].
 
 Example Use Case
 To import events from a remote API into a local database, run the following command:

@@ -32,7 +32,8 @@ def get_indices(ano=None,mes=None,dia=None):
     else:
         indices = wzh.indices_request().json()
         wazuh_indices = [index['index'] for index in indices if 'wazuh-alerts' in index['index']]
-        return wazuh_indices
+        
+        return wazuh_indices.pop()
 
 def get_data(idx,ids=None,tam=10000):
     
@@ -105,7 +106,7 @@ def import_events_by_timestamp(idx):
     
     pbar.close()    
 
-def fast_import_events(idx):
+def import_events_by_timestamp(idx):
     print(f'Importando Eventos do Index = {idx}')
     db.createTables(idx)
     
@@ -132,68 +133,5 @@ def fast_import_events(idx):
             logging.error(f"Error inserting batch {i}: {e}")
     
     pbar.close()
-    
-def import_compressed_events(idx):
-    totalEventsCount = wzh.get_total_events(idx)
-    print(f'Total de Eventos do Index = {totalEventsCount}')
-    
-    all_events = wzh.fetch_events_by_timestamp(idx)
-    
-    pbear = tqdm(total=len(all_events), initial=0, desc="Comprimindo Eventos", unit="events")
-    compressed_events = []
-    for event in all_events:
-        compressed_events.append(db.compress_data(event))
-        pbear.update(1)
-    pbear.close()    
-    
-    pbar = tqdm(total=len(compressed_events), initial=0, desc="Salvando Eventos no Banco", unit="events")
-    idx = db.createTablesCompressed(idx)
-    
-    batch_size = 10000
-    for i in range(0, len(compressed_events), batch_size):
-        try:
-            batch_events = compressed_events[i:i+batch_size]
-            db.insertDataCompressed(idx,batch_events)
-            pbar.update(len(batch_events))
-        except Exception as e:
-            logging.error(f"Error inserting batch {i}: {e}")
-    
-    pbar.close()
-    
-def import_compressed_events_by_id(idx):
-    total_events_count = wzh.get_total_events(idx)
-    
-    new_idx  = db.createTablesCompressed(idx)
-    ids_existentes = []
-    
-    print(f"Total de Eventos do Index = {total_events_count}")
-    
-    pbar = tqdm(total=(total_events_count), initial=len(ids_existentes), desc="Importando Eventos", unit="events")
-    
-    # while len(ids_existentes) < total_events_count:
-    ids = 0
-    for ids in range(total_events_count):
-        try:               
-            events = wzh.data_request2(idx, exclude_ids=ids_existentes, size=10000)
-            
-            if not events:
-                break  
-            
-            compressed_events = []
-            for event in events:
-                compressed_events.append(db.compress_data(event))
-            
-            db.insertDataCompressed(new_idx,compressed_events)
-            
-            ids_existentes.extend([event['_id'] for event in events])
-            logging.info(len(ids_existentes))
-            
-            pbar.update(10000)
-            ids = len(ids_existentes)
-        
-        except Exception as e:
-            print(f"Error inserting batch : {e}")
-            break;
-    
-    pbar.close()    
-    
+
+# def import_events_by_timestamp(idx):
